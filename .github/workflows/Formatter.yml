@@ -1,0 +1,42 @@
+name: Code Formatter
+ 
+# Trigger the workflow on push and pull request events
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+ 
+jobs:
+  format:
+    runs-on: ubuntu-latest  # Run the job on the latest Ubuntu environment
+ 
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4  # Check out the repository code
+ 
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'  # Specify Node.js version
+ 
+      - name: Install Dependencies
+        run: npm install  # Install project dependencies (including Prettier)
+ 
+      - name: Run Prettier
+        run: npx prettier --check .  # Check formatting
+ 
+      - name: Auto-fix Formatting Issues
+        if: failure()  # Only run if the previous step fails
+        run: npx prettier --write .  # Automatically format the code
+ 
+      - name: Commit Changes (if any)
+        if: success() && github.event_name == 'push'
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add .
+          git commit -m "Auto-format code via GitHub Actions" || echo "No changes to commit"
+          git push
+has context menu
+
